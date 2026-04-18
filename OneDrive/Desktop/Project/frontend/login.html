@@ -1,0 +1,440 @@
+<!-- ==================== LOGIN.HTML WITH MFA ==================== -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="js/api.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shorto | Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #1a1a3e 50%, #24243e 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .login-container {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 32px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 450px;
+            border: 1px solid rgba(255,255,255,0.1);
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #cbd5e1;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            color: white;
+            font-size: 1rem;
+            transition: 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #a855f7;
+            box-shadow: 0 0 15px rgba(168,85,247,0.3);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            border: none;
+            border-radius: 16px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(168,85,247,0.4);
+        }
+
+        .btn-login:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .attempts {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.8rem;
+            color: #fbbf24;
+        }
+
+        .lock-message {
+            text-align: center;
+            margin-top: 1rem;
+            padding: 0.8rem;
+            background: rgba(239, 68, 68, 0.2);
+            border-radius: 12px;
+            color: #f87171;
+            font-size: 0.8rem;
+            display: none;
+        }
+
+        .register-link {
+            text-align: center;
+            margin-top: 2rem;
+            color: #94a3b8;
+        }
+
+        .register-link a {
+            color: #a855f7;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .error-msg {
+            color: #f87171;
+            font-size: 0.8rem;
+            margin-top: 0.3rem;
+            text-align: center;
+        }
+
+        .success-msg {
+            color: #4ade80;
+            font-size: 0.8rem;
+            margin-top: 0.3rem;
+            text-align: center;
+        }
+
+        /* MFA Section Styles */
+        .mfa-section {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .otp-input {
+            text-align: center;
+            letter-spacing: 5px;
+            font-size: 1.2rem;
+        }
+
+        .resend-link {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .resend-link a {
+            color: #a855f7;
+            text-decoration: none;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 0.5rem;
+        }
+
+        .back-link a {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-container">
+    <div class="logo">🕊️ Shorto</div>
+
+    <!-- Login Form Section -->
+    <div id="loginSection">
+        <div class="form-group">
+            <label><i class="fas fa-envelope"></i> Email Address</label>
+            <input type="email" id="email" placeholder="you@example.com">
+        </div>
+
+        <div class="form-group">
+            <label><i class="fas fa-lock"></i> Password</label>
+            <input type="password" id="password" placeholder="Enter password">
+        </div>
+
+        <button class="btn-login" onclick="doLogin()" id="loginBtn">
+            <i class="fas fa-sign-in-alt"></i> Login
+        </button>
+
+        <div class="attempts" id="attempts">Attempts remaining: 3</div>
+        <div class="lock-message" id="lockMessage"></div>
+        <div class="error-msg" id="loginError"></div>
+
+        <div class="register-link">
+            New to Shorto? <a href="register.html">Create Account</a>
+        </div>
+        <div class="forgot-link" style="text-align: center; margin-top: 0.5rem;">
+            <a href="forgot-password.html" style="color: #a855f7; text-decoration: none; font-size: 0.8rem;">Forgot Password?</a>
+        </div>
+    </div>
+
+    <!-- MFA Section (initially hidden) -->
+    <div id="mfaSection" style="display: none;">
+        <div class="form-group">
+            <label><i class="fas fa-key"></i> Enter OTP</label>
+            <input type="text" id="otp" class="otp-input" placeholder="000000" maxlength="6" autocomplete="off">
+        </div>
+
+        <button class="btn-login" onclick="verifyMFA()" id="verifyBtn">
+            <i class="fas fa-check-circle"></i> Verify & Login
+        </button>
+
+        <div class="resend-link">
+            <a onclick="resendOTP()">⟳ Didn't receive OTP? Resend</a>
+        </div>
+        <div class="back-link">
+            <a onclick="backToLogin()">← Back to Login</a>
+        </div>
+        <div class="error-msg" id="mfaError"></div>
+    </div>
+
+</div>
+
+<script>
+    let attempts = 3;
+    let lockUntil = null;
+    let currentEmail = '';
+
+    function checkLock() {
+        const lockData = localStorage.getItem('loginLock');
+        if (lockData) {
+            const lock = JSON.parse(lockData);
+            if (Date.now() < lock.until) {
+                const remaining = Math.ceil((lock.until - Date.now()) / (1000 * 60 * 60));
+                document.getElementById('lockMessage').textContent = `Account locked for ${remaining} hours due to multiple failed attempts`;
+                document.getElementById('lockMessage').style.display = 'block';
+                document.getElementById('loginBtn').disabled = true;
+                return true;
+            } else {
+                localStorage.removeItem('loginLock');
+                attempts = 3;
+                updateAttempts();
+                document.getElementById('loginBtn').disabled = false;
+            }
+        }
+        return false;
+    }
+
+    function updateAttempts() {
+        document.getElementById('attempts').textContent = `Attempts remaining: ${attempts}`;
+    }
+
+    function showError(elementId, message) {
+        const el = document.getElementById(elementId);
+        el.textContent = message;
+        setTimeout(() => {
+            if (el.textContent === message) el.textContent = '';
+        }, 5000);
+    }
+
+    function showSuccess(elementId, message) {
+        const el = document.getElementById(elementId);
+        el.textContent = message;
+        el.className = 'success-msg';
+        setTimeout(() => {
+            if (el.textContent === message) el.textContent = '';
+        }, 3000);
+    }
+
+    async function doLogin() {
+        if (checkLock()) return;
+
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        if (!email || !password) {
+            showError('loginError', 'Please enter email and password');
+            return;
+        }
+
+        const loginBtn = document.getElementById('loginBtn');
+        loginBtn.disabled = true;
+        loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending OTP...';
+
+        try {
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await response.json();
+
+            if (data.success && data.requiresMFA) {
+                currentEmail = email;
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('mfaSection').style.display = 'block';
+                document.getElementById('otp').value = '';
+                showSuccess('loginError', '✅ OTP sent to your email! Check inbox or spam.');
+            } else if (!data.success) {
+                attempts--;
+                updateAttempts();
+
+                if (attempts <= 0) {
+                    const lockTime = Date.now() + (24 * 60 * 60 * 1000);
+                    localStorage.setItem('loginLock', JSON.stringify({ until: lockTime }));
+                    document.getElementById('lockMessage').textContent = 'Too many failed attempts. Account locked for 24 hours!';
+                    document.getElementById('lockMessage').style.display = 'block';
+                    document.getElementById('loginBtn').disabled = true;
+                } else {
+                    showError('loginError', data.message || 'Invalid credentials');
+                }
+            } else {
+                // Fallback: direct login without MFA (if backend returns token directly)
+                if (data.token) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('currentUser', JSON.stringify(data.user));
+                    window.location.href = 'dashboard.html';
+                }
+            }
+        } catch (error) {
+            showError('loginError', 'Network error. Please try again.');
+            console.error('Login error:', error);
+        } finally {
+            loginBtn.disabled = false;
+            loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+        }
+    }
+
+    async function verifyMFA() {
+        const otp = document.getElementById('otp').value;
+
+        if (!otp || otp.length !== 6) {
+            showError('mfaError', 'Please enter a valid 6-digit OTP');
+            return;
+        }
+
+        const verifyBtn = document.getElementById('verifyBtn');
+        verifyBtn.disabled = true;
+        verifyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+
+        try {
+            const response = await fetch('/api/auth/verify-mfa', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: currentEmail, otp: otp })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('currentUser', JSON.stringify(data.user));
+                showSuccess('mfaError', '✅ Login successful! Redirecting...');
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1000);
+            } else {
+                showError('mfaError', data.message || 'Invalid OTP. Please try again.');
+            }
+        } catch (error) {
+            showError('mfaError', 'Network error. Please try again.');
+            console.error('MFA verify error:', error);
+        } finally {
+            verifyBtn.disabled = false;
+            verifyBtn.innerHTML = '<i class="fas fa-check-circle"></i> Verify & Login';
+        }
+    }
+
+    async function resendOTP() {
+        if (!currentEmail) {
+            backToLogin();
+            return;
+        }
+
+        showSuccess('mfaError', '⟳ Resending OTP...');
+
+        try {
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: currentEmail, password: '' })
+            });
+
+            const data = await response.json();
+
+            if (data.success && data.requiresMFA) {
+                showSuccess('mfaError', '✅ New OTP sent to your email!');
+            } else {
+                showError('mfaError', 'Failed to resend OTP. Please login again.');
+                setTimeout(() => backToLogin(), 2000);
+            }
+        } catch (error) {
+            showError('mfaError', 'Network error');
+        }
+    }
+
+    function backToLogin() {
+        document.getElementById('mfaSection').style.display = 'none';
+        document.getElementById('loginSection').style.display = 'block';
+        document.getElementById('email').value = '';
+        document.getElementById('password').value = '';
+        document.getElementById('otp').value = '';
+        currentEmail = '';
+        document.getElementById('loginError').textContent = '';
+        document.getElementById('mfaError').textContent = '';
+    }
+
+    // Enter key press handlers
+    document.getElementById('password')?.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') doLogin();
+    });
+    document.getElementById('otp')?.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') verifyMFA();
+    });
+
+    checkLock();
+</script>
+
+</body>
+</html>

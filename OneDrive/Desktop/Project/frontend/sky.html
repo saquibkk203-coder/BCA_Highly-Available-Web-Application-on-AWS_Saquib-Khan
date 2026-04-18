@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="js/api.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Shorto | Flying Sky</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #1a1a3e 50%, #24243e 100%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+        }
+        .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+        .star { position: absolute; background: white; border-radius: 50%; animation: twinkle 3s infinite; }
+        @keyframes twinkle { 0%,100% { opacity: 0.2; } 50% { opacity: 1; } }
+
+        .menu-toggle {
+            position: fixed; top: 15px; left: 15px; z-index: 1001;
+            background: rgba(168,85,247,0.9); border: none; color: white;
+            width: 45px; height: 45px; border-radius: 12px; font-size: 1.3rem;
+            cursor: pointer; display: none;
+        }
+        .sidebar {
+            position: fixed; left: 0; top: 0; width: 260px; height: 100%;
+            background: rgba(15,23,42,0.98); backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255,255,255,0.1);
+            padding: 2rem 1rem; z-index: 1000; transition: transform 0.3s;
+            overflow-y: auto;
+        }
+        .sidebar.closed { transform: translateX(-100%); }
+        .logo { font-size: 1.5rem; font-weight: 800; background: linear-gradient(135deg,#a855f7,#ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; text-align: center; margin-bottom: 2rem; }
+        .menu-item { display: flex; align-items: center; gap: 12px; padding: 12px 15px; margin: 5px 0; border-radius: 12px; color: #94a3b8; cursor: pointer; transition: 0.3s; }
+        .menu-item:hover, .menu-item.active { background: rgba(168,85,247,0.2); color: white; }
+        .menu-item i { width: 24px; }
+
+        .main-content { margin-left: 260px; padding: 2rem; position: relative; z-index: 1; min-height: 100vh; }
+        .header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;
+            background: rgba(15,23,42,0.5); backdrop-filter: blur(10px);
+            padding: 1rem 1.5rem; border-radius: 24px;
+        }
+        .user-info { display: flex; align-items: center; gap: 10px; background: rgba(30,41,59,0.6); padding: 0.5rem 1rem; border-radius: 40px; cursor: pointer; }
+        .avatar { width: 35px; height: 35px; background: linear-gradient(135deg,#a855f7,#ec4899); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+
+        .sky-container {
+            background: rgba(0,0,0,0.3);
+            border-radius: 32px;
+            padding: 2rem;
+            min-height: 500px;
+            position: relative;
+            overflow: hidden;
+        }
+        .sky-title {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .sky-title h2 { font-size: 1.8rem; background: linear-gradient(135deg,#a855f7,#ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+        .flying-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .flying-letter {
+            background: rgba(30,41,59,0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid rgba(255,255,255,0.1);
+            animation: float 3s ease-in-out infinite;
+        }
+        .flying-letter:hover {
+            transform: translateY(-10px) scale(1.05);
+            border-color: #a855f7;
+            box-shadow: 0 15px 30px rgba(168,85,247,0.3);
+        }
+        @keyframes float {
+            0%,100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        .letter-icon {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+        .letter-preview {
+            font-size: 0.8rem;
+            color: #cbd5e1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .letter-time {
+            font-size: 0.6rem;
+            color: #64748b;
+            margin-top: 0.5rem;
+        }
+
+        .catch-btn {
+            width: 100%;
+            padding: 0.5rem;
+            background: linear-gradient(135deg,#a855f7,#ec4899);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            margin-top: 0.5rem;
+            cursor: pointer;
+        }
+
+        .empty-sky {
+            text-align: center;
+            padding: 3rem;
+            color: #64748b;
+        }
+
+        @media (max-width: 768px) {
+            .menu-toggle { display: block; }
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 1rem; padding-top: 70px; }
+            .flying-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+<button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+
+<div class="sidebar" id="sidebar">
+    <div class="logo">🕊️ Shorto</div>
+    <div onclick="navigate('dashboard.html')" class="menu-item"><i class="fas fa-home"></i> Dashboard</div>
+    <div onclick="navigate('send.html')" class="menu-item"><i class="fas fa-paper-plane"></i> Send Message</div>
+    <div onclick="navigate('sky.html')" class="menu-item active"><i class="fas fa-globe"></i> Flying Sky</div>
+    <div onclick="navigate('requests.html')" class="menu-item"><i class="fas fa-handshake"></i> Requests</div>
+    <div onclick="navigate('messages.html')" class="menu-item"><i class="fas fa-comments"></i> Messages</div>
+    <div onclick="navigate('profile.html')" class="menu-item"><i class="fas fa-user"></i> Profile</div>
+    <div onclick="logout()" class="menu-item" style="margin-top: 2rem; color: #f87171;"><i class="fas fa-sign-out-alt"></i> Logout</div>
+</div>
+
+<div class="main-content">
+    <div class="header">
+        <h2><i class="fas fa-globe" style="color: #a855f7;"></i> Flying Messages Sky</h2>
+        <div class="user-info" onclick="navigate('profile.html')">
+            <div class="avatar"><i class="fas fa-user"></i></div>
+            <span id="userName">User</span>
+        </div>
+    </div>
+
+    <div class="sky-container">
+        <div class="sky-title">
+            <h2><i class="fas fa-feather-alt"></i> Messages Flying in the Sky</h2>
+            <p>Click on any message to catch it and read! 🕊️</p>
+        </div>
+
+        <div class="flying-grid" id="flyingGrid">
+            <div class="empty-sky">
+                <i class="fas fa-cloud-moon" style="font-size: 3rem; margin-bottom: 1rem; display: block;"></i>
+                Loading messages...
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    for (let i = 0; i < 100; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.width = Math.random() * 3 + 1 + 'px';
+        star.style.height = star.style.width;
+        star.style.animationDelay = Math.random() * 5 + 's';
+        document.getElementById('stars').appendChild(star);
+    }
+
+    const sidebar = document.getElementById('sidebar');
+    document.getElementById('menuToggle').onclick = () => sidebar.classList.toggle('open');
+
+    function navigate(page) { window.location.href = page; }
+    function logout() { localStorage.removeItem('currentUser'); localStorage.removeItem('token'); window.location.href = 'index.html'; }
+
+    let user = null;
+    let token = null;
+    try {
+        const u = localStorage.getItem('currentUser');
+        if (u && u !== 'undefined') user = JSON.parse(u);
+        token = localStorage.getItem('token');
+    } catch(e) {}
+    if (!user) user = { email: 'demo@shorto.com', fullname: 'Demo User' };
+    document.getElementById('userName').innerText = user.fullname || user.email.split('@')[0];
+
+    async function loadFlyingMessages() {
+        if (!token) {
+            document.getElementById('flyingGrid').innerHTML = `<div class="empty-sky">Please <a href="login.html" style="color:#a855f7;">login</a> to see flying messages.</div>`;
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/messages/flying', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const data = await response.json();
+
+            const grid = document.getElementById('flyingGrid');
+            if (!data.messages || data.messages.length === 0) {
+                grid.innerHTML = `<div class="empty-sky"><i class="fas fa-cloud-moon" style="font-size: 3rem; margin-bottom: 1rem; display: block;"></i>No messages flying right now.<br>Be the first to <a href="send.html" style="color: #a855f7;">send a message!</a></div>`;
+                return;
+            }
+
+            grid.innerHTML = data.messages.map(msg => `
+                <div class="flying-letter" onclick="catchMessage('${msg.message_id}', '${escapeHtml(msg.text)}', '${msg.sender_email || ''}')">
+                    <div class="letter-icon">📨</div>
+                    <div class="letter-preview">${msg.text.substring(0, 30)}${msg.text.length > 30 ? '...' : ''}</div>
+                    <div class="letter-time">${new Date(msg.created_at).toLocaleTimeString()}</div>
+                    <button class="catch-btn"><i class="fas fa-hand-peace"></i> Catch</button>
+                </div>
+            `).join('');
+        } catch(e) {
+            console.error('Error loading messages:', e);
+            document.getElementById('flyingGrid').innerHTML = `<div class="empty-sky">Error loading messages. Please try again.</div>`;
+        }
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    async function catchMessage(messageId, messageText, senderEmail) {
+    if (!token) {
+        alert('Please login first');
+        navigate('login.html');
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/messages/catch/${messageId}`, {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const data = await response.json();
+        console.log('Catch response:', data);
+        
+        if (data.success) {
+            // Get sender email from API response
+            const caughtMsg = data.caughtMessage;
+            const encodedText = encodeURIComponent(messageText);
+            const encodedSender = encodeURIComponent(caughtMsg.sender_email || senderEmail || '');
+            
+            window.location.href = `read.html?id=${messageId}&text=${encodedText}&sender=${encodedSender}`;
+        } else {
+            alert(data.message || 'Failed to catch message');
+        }
+    } catch(e) {
+        console.error('Error:', e);
+        alert('Error catching message');
+    }
+}
+
+    loadFlyingMessages();
+    setInterval(loadFlyingMessages, 10000);
+</script>
+</body>
+</html>

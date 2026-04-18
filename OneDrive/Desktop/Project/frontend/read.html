@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="js/api.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shorto | Read Message</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #1a1a3e 50%, #24243e 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+        .star { position: absolute; background: white; border-radius: 50%; animation: twinkle 3s infinite; }
+        @keyframes twinkle { 0%,100% { opacity: 0.2; } 50% { opacity: 1; } }
+
+        .menu-toggle { position: fixed; top: 15px; left: 15px; z-index: 1001; background: rgba(168,85,247,0.9); border: none; color: white; width: 45px; height: 45px; border-radius: 12px; font-size: 1.3rem; cursor: pointer; display: none; }
+        .sidebar { position: fixed; left: 0; top: 0; width: 260px; height: 100%; background: rgba(15,23,42,0.98); backdrop-filter: blur(20px); border-right: 1px solid rgba(255,255,255,0.1); padding: 2rem 1rem; z-index: 1000; transition: transform 0.3s; }
+        .sidebar.closed { transform: translateX(-100%); }
+        .logo { font-size: 1.5rem; font-weight: 800; background: linear-gradient(135deg,#a855f7,#ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; text-align: center; margin-bottom: 2rem; }
+        .menu-item { display: flex; align-items: center; gap: 12px; padding: 12px 15px; margin: 5px 0; border-radius: 12px; color: #94a3b8; cursor: pointer; transition: 0.3s; }
+        .menu-item:hover, .menu-item.active { background: rgba(168,85,247,0.2); color: white; }
+        .menu-item i { width: 24px; }
+
+        .main-content { margin-left: 260px; padding: 2rem; position: relative; z-index: 1; min-height: 100vh; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; background: rgba(15,23,42,0.5); backdrop-filter: blur(10px); padding: 1rem 1.5rem; border-radius: 24px; }
+        .user-info { display: flex; align-items: center; gap: 10px; background: rgba(30,41,59,0.6); padding: 0.5rem 1rem; border-radius: 40px; cursor: pointer; }
+        .avatar { width: 35px; height: 35px; background: linear-gradient(135deg,#a855f7,#ec4899); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+
+        .letter-card {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(30,41,59,0.7);
+            backdrop-filter: blur(20px);
+            border-radius: 32px;
+            padding: 2rem;
+            border: 1px solid rgba(255,255,255,0.1);
+            animation: slideUp 0.5s;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .letter-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .letter-icon { font-size: 4rem; margin-bottom: 0.5rem; }
+        .sender-info {
+            background: rgba(168,85,247,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            display: inline-block;
+            font-size: 0.8rem;
+        }
+        .message-text {
+            background: rgba(0,0,0,0.3);
+            padding: 1.5rem;
+            border-radius: 20px;
+            margin: 1.5rem 0;
+            font-size: 1rem;
+            line-height: 1.6;
+            border-left: 3px solid #a855f7;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        .btn-request, .btn-pass {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            border-radius: 40px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .btn-request {
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            color: white;
+        }
+        .btn-pass {
+            background: rgba(30,41,59,0.8);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #94a3b8;
+        }
+        .btn-request:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(168,85,247,0.4); }
+        .btn-pass:hover { background: rgba(239,68,68,0.3); border-color: #ef4444; color: white; }
+
+        @media (max-width: 768px) {
+            .menu-toggle { display: block; }
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 1rem; padding-top: 70px; }
+            .action-buttons { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+<button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+
+<div class="sidebar" id="sidebar">
+    <div class="logo">🕊️ Shorto</div>
+    <div onclick="navigate('dashboard.html')" class="menu-item"><i class="fas fa-home"></i> Dashboard</div>
+    <div onclick="navigate('send.html')" class="menu-item"><i class="fas fa-paper-plane"></i> Send Message</div>
+    <div onclick="navigate('sky.html')" class="menu-item"><i class="fas fa-globe"></i> Flying Sky</div>
+    <div onclick="navigate('requests.html')" class="menu-item"><i class="fas fa-handshake"></i> Requests</div>
+    <div onclick="navigate('messages.html')" class="menu-item"><i class="fas fa-comments"></i> Messages</div>
+    <div onclick="navigate('profile.html')" class="menu-item"><i class="fas fa-user"></i> Profile</div>
+    <div onclick="logout()" class="menu-item" style="margin-top: 2rem; color: #f87171;"><i class="fas fa-sign-out-alt"></i> Logout</div>
+</div>
+
+<div class="main-content">
+    <div class="header">
+        <h2><i class="fas fa-envelope-open-text" style="color: #a855f7;"></i> Read Message</h2>
+        <div class="user-info" onclick="navigate('profile.html')">
+            <div class="avatar"><i class="fas fa-user"></i></div>
+            <span id="userName">User</span>
+        </div>
+    </div>
+
+    <div class="letter-card" id="letterCard">
+        <div class="empty-chat" style="text-align:center; padding:2rem;">Loading...</div>
+    </div>
+</div>
+
+<script>
+    for (let i = 0; i < 100; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.width = Math.random() * 3 + 1 + 'px';
+        star.style.height = star.style.width;
+        star.style.animationDelay = Math.random() * 5 + 's';
+        document.getElementById('stars').appendChild(star);
+    }
+
+    const sidebar = document.getElementById('sidebar');
+    document.getElementById('menuToggle').onclick = () => sidebar.classList.toggle('open');
+    function navigate(page) { window.location.href = page; }
+    function logout() { localStorage.removeItem('currentUser'); localStorage.removeItem('token'); window.location.href = 'index.html'; }
+
+    let user = null;
+    let token = null;
+    try {
+        const u = localStorage.getItem('currentUser');
+        if (u && u !== 'undefined') user = JSON.parse(u);
+        token = localStorage.getItem('token');
+    } catch(e) {}
+    if (!user) user = { email: 'demo@shorto.com', fullname: 'Demo User' };
+    document.getElementById('userName').innerText = user.fullname || user.email.split('@')[0];
+
+    // Get message from URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const messageId = urlParams.get('id');
+    const messageText = urlParams.get('text');
+    const senderEmail = urlParams.get('sender');
+
+    if (!messageId) {
+        document.getElementById('letterCard').innerHTML = '<div style="text-align:center; padding:3rem;">No message to read. <a href="sky.html" style="color:#a855f7;">Go catch one!</a></div>';
+    } else {
+        document.getElementById('letterCard').innerHTML = `
+            <div class="letter-header">
+                <div class="letter-icon">📨</div>
+                <div class="sender-info">
+                    <i class="fas fa-user"></i> From: Anonymous Flyer
+                </div>
+            </div>
+            <div class="message-text">
+                "${messageText || 'No message content'}"
+            </div>
+            <div class="action-buttons">
+                <button class="btn-request" onclick="sendRequest()"><i class="fas fa-handshake"></i> Send Request to Talk</button>
+                <button class="btn-pass" onclick="passMessage()"><i class="fas fa-forward"></i> Pass to Next</button>
+            </div>
+            <p style="text-align: center; margin-top: 1rem; font-size: 0.7rem; color: #64748b;">
+                <i class="fas fa-info-circle"></i> Send request to connect with the sender. Pass to let this message fly to someone else.
+            </p>
+        `;
+    }
+
+    async function sendRequest() {
+        const token = localStorage.getItem('token');  // ← ADD THIS LINE
+        console.log('Token in sendRequest:', token);   // ← ADD THIS LINE
+        if (!token) {
+            alert('Please login first');
+            navigate('login.html');
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/requests/send', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({
+                    toEmail: senderEmail,
+                    messageId: messageId,
+                    messageText: messageText
+                })
+            });
+            const data = await response.json();
+            if (data.success) {
+                alert('✨ Request sent! The sender will see it in their Requests page.');
+                navigate('sky.html');
+            } else {
+                alert(data.message || 'Failed to send request');
+            }
+        } catch(e) {
+            alert('Error sending request');
+        }
+    }
+
+    async function passMessage() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        alert('Please login first');
+        navigate('login.html');
+        return;
+    }
+
+    // Get messageId from URL (ADD THIS LINE)
+    const urlParams = new URLSearchParams(window.location.search);
+    const messageId = urlParams.get('id');
+
+    console.log('Passing message ID:', messageId);
+
+    if (!messageId) {
+        alert('Error: Message ID not found');
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/messages/pass/${messageId}`, {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        });
+        const data = await response.json();
+        console.log('Pass response:', data);
+        
+        if (data.success) {
+            alert('🕊️ Message passed! It will fly to someone else.');
+            navigate('sky.html');
+        } else {
+            alert(data.message || 'Failed to pass message');
+        }
+    } catch(e) {
+        console.error('Error:', e);
+        alert('Error passing message');
+    }
+}
+
+</script>
+</body>
+</html>

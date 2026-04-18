@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="js/api.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Shorto | Send Flying Message</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #1a1a3e 50%, #24243e 100%);
+            min-height: 100vh;
+            color: white;
+        }
+
+        /* Stars Background */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* Mobile Menu Toggle */
+        .menu-toggle {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1001;
+            background: rgba(168, 85, 247, 0.9);
+            border: none;
+            color: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            font-size: 1.3rem;
+            cursor: pointer;
+            display: none;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 260px;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.98);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255,255,255,0.1);
+            padding: 2rem 1rem;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+        .sidebar.closed {
+            transform: translateX(-100%);
+        }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            margin: 5px 0;
+            border-radius: 12px;
+            color: #94a3b8;
+            text-decoration: none;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .menu-item:hover, .menu-item.active {
+            background: rgba(168, 85, 247, 0.2);
+            color: white;
+        }
+        .menu-item i { width: 24px; }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 260px;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(10px);
+            padding: 1rem 1.5rem;
+            border-radius: 24px;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(30, 41, 59, 0.6);
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            cursor: pointer;
+        }
+        .avatar {
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Send Card */
+        .send-card {
+            max-width: 700px;
+            margin: 0 auto;
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(20px);
+            border-radius: 32px;
+            padding: 2rem;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .send-title {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .send-title h2 {
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .send-title p {
+            color: #94a3b8;
+            margin-top: 0.5rem;
+        }
+        .message-input {
+            width: 100%;
+            min-height: 200px;
+            padding: 1rem;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            color: white;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            margin-bottom: 1rem;
+        }
+        .message-input:focus {
+            outline: none;
+            border-color: #a855f7;
+            box-shadow: 0 0 15px rgba(168,85,247,0.3);
+        }
+        .char-count {
+            text-align: right;
+            font-size: 0.7rem;
+            color: #64748b;
+            margin-bottom: 1.5rem;
+        }
+        .random-badge {
+            background: rgba(168,85,247,0.2);
+            padding: 0.8rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-size: 0.85rem;
+            border: 1px dashed rgba(168,85,247,0.4);
+        }
+        .send-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            border: none;
+            border-radius: 40px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .send-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(168,85,247,0.4);
+        }
+        .preview-box {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: rgba(0,0,0,0.3);
+            border-radius: 16px;
+            display: none;
+        }
+        .preview-box.show {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Pigeon Animation Overlay */
+        .pigeon-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            display: none;
+        }
+        .pigeon {
+            position: absolute;
+            font-size: 70px;
+            bottom: 30%;
+            left: -100px;
+            animation: flyAcross 1.8s ease-in-out forwards;
+            filter: drop-shadow(0 0 15px #a855f7);
+        }
+        @keyframes flyAcross {
+            0% { left: -100px; transform: translateY(0) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            50% { left: 45%; transform: translateY(-80px) rotate(5deg); }
+            100% { left: 110%; transform: translateY(-50px) rotate(10deg); opacity: 0; }
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 20px;
+            left: 20px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            padding: 1rem;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transform: translateX(200%);
+            transition: 0.4s;
+            z-index: 10000;
+            max-width: 350px;
+            margin: 0 auto;
+        }
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        @media (max-width: 768px) {
+            .menu-toggle { display: block; }
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 1rem; padding-top: 70px; }
+            .send-card { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+<button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+
+<div class="sidebar" id="sidebar">
+    <div class="logo">🕊️ Shorto</div>
+    <div onclick="navigate('dashboard.html')" class="menu-item"><i class="fas fa-home"></i> Dashboard</div>
+    <div onclick="navigate('send.html')" class="menu-item active"><i class="fas fa-paper-plane"></i> Send Message</div>
+    <div onclick="navigate('sky.html')" class="menu-item"><i class="fas fa-globe"></i> Flying Sky</div>
+    <div onclick="navigate('requests.html')" class="menu-item"><i class="fas fa-handshake"></i> Requests</div>
+    <div onclick="navigate('messages.html')" class="menu-item"><i class="fas fa-comments"></i> Messages</div>
+    <div onclick="navigate('profile.html')" class="menu-item"><i class="fas fa-user"></i> Profile</div>
+    <div onclick="logout()" class="menu-item" style="margin-top: 2rem; color: #f87171;"><i class="fas fa-sign-out-alt"></i> Logout</div>
+</div>
+
+<div class="main-content">
+    <div class="header">
+        <h2><i class="fas fa-feather-alt" style="color: #a855f7;"></i> Send Flying Message</h2>
+        <div class="user-info" onclick="navigate('profile.html')">
+            <div class="avatar"><i class="fas fa-user"></i></div>
+            <span id="userName">User</span>
+        </div>
+    </div>
+
+    <div class="send-card">
+        <div class="send-title">
+            <h2><i class="fas fa-paper-plane"></i> Release a Message</h2>
+            <p>Your message will fly randomly to someone in the world!</p>
+        </div>
+
+        <textarea class="message-input" id="messageInput" placeholder="Write your message here... It will fly anonymously to random strangers! ✨" maxlength="500"></textarea>
+        <div class="char-count"><span id="charCount">0</span>/500 characters</div>
+
+        <div class="random-badge">
+            <i class="fas fa-random" style="color: #a855f7;"></i> 
+            This message will fly RANDOMLY to any user in the world!
+            <br><small>No specific recipient needed. Just release and watch it fly! 🕊️</small>
+        </div>
+
+        <button class="send-btn" id="sendBtn">
+            <i class="fas fa-feather-alt"></i> Release into the Sky 🕊️
+        </button>
+
+        <div class="preview-box" id="previewBox">
+            <small style="color: #a855f7;"><i class="fas fa-eye"></i> Message Preview</small>
+            <p id="previewText" style="margin-top: 8px; font-size: 0.9rem; color: #cbd5e1;"></p>
+        </div>
+    </div>
+</div>
+
+<div class="pigeon-overlay" id="pigeonOverlay">
+    <div class="pigeon">🕊️📨</div>
+</div>
+<div class="toast" id="toast"><i class="fas fa-check-circle"></i><span id="toastMsg">Message sent!</span></div>
+
+<script>
+    // Stars
+    for (let i = 0; i < 100; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.width = Math.random() * 3 + 1 + 'px';
+        star.style.height = star.style.width;
+        star.style.animationDelay = Math.random() * 5 + 's';
+        document.getElementById('stars').appendChild(star);
+    }
+
+    // Mobile menu
+    const sidebar = document.getElementById('sidebar');
+    document.getElementById('menuToggle').onclick = () => sidebar.classList.toggle('open');
+
+    function navigate(page) { window.location.href = page; }
+    function logout() { localStorage.removeItem('currentUser'); window.location.href = 'index.html'; }
+
+    // User
+    let user = null;
+    try {
+        const u = localStorage.getItem('currentUser');
+        if (u && u !== 'undefined') user = JSON.parse(u);
+    } catch(e) {}
+    if (!user) user = { email: 'demo@shorto.com', fullname: 'Demo User' };
+    document.getElementById('userName').innerText = user.fullname || user.email.split('@')[0];
+
+    // Char counter + preview
+    const input = document.getElementById('messageInput');
+    const charSpan = document.getElementById('charCount');
+    const previewBox = document.getElementById('previewBox');
+    const previewText = document.getElementById('previewText');
+
+    input.addEventListener('input', () => {
+        const len = input.value.length;
+        charSpan.innerText = len;
+        if (len > 0) {
+            previewText.innerText = input.value.substring(0, 150) + (len > 150 ? '...' : '');
+            previewBox.classList.add('show');
+        } else {
+            previewBox.classList.remove('show');
+        }
+    });
+
+    function showToast(msg) {
+        document.getElementById('toastMsg').innerText = msg;
+        const toast = document.getElementById('toast');
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    function flyPigeon() {
+        const overlay = document.getElementById('pigeonOverlay');
+        overlay.style.display = 'block';
+        setTimeout(() => overlay.style.display = 'none', 1900);
+    }
+
+    // Send message
+    // Send message - BACKEND API CALL
+document.getElementById('sendBtn').onclick = async () => {
+    const message = input.value.trim();
+    if (!message) {
+        showToast('✏️ Please write a message first!');
+        return;
+    }
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+        showToast('❌ Please login first!');
+        navigate('login.html');
+        return;
+    }
+
+    showToast('📡 Releasing message...');
+
+    try {
+        const response = await fetch('/api/messages/send', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({ text: message })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            flyPigeon();
+            setTimeout(() => {
+                showToast(`🕊️ Message released into the sky! It will fly for 24 hours.`);
+                input.value = '';
+                previewBox.classList.remove('show');
+                charSpan.innerText = '0';
+            }, 500);
+        } else {
+            showToast('❌ Failed: ' + (data.message || 'Unknown error'));
+        }
+    } catch(error) {
+        console.error('Send error:', error);
+        showToast('❌ Network error. Try again.');
+    }
+};
+</script>
+</body>
+</html>

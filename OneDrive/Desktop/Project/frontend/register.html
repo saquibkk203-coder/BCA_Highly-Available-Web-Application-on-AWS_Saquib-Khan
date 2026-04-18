@@ -1,0 +1,357 @@
+<!-- ==================== REGISTER.HTML ==================== -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="js/api.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shorto | Register</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #1a1a3e 50%, #24243e 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .register-container {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 32px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 500px;
+            border: 1px solid rgba(255,255,255,0.1);
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #cbd5e1;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            color: white;
+            font-size: 1rem;
+            transition: 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #a855f7;
+            box-shadow: 0 0 15px rgba(168,85,247,0.3);
+        }
+
+        .otp-group {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .otp-group input {
+            flex: 2;
+        }
+
+        .otp-group button {
+            flex: 1;
+            padding: 1rem;
+            background: rgba(168,85,247,0.2);
+            border: 1px solid rgba(168,85,247,0.4);
+            border-radius: 16px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .otp-group button:hover {
+            background: rgba(168,85,247,0.4);
+        }
+
+        .btn-register {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            border: none;
+            border-radius: 16px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 1rem;
+        }
+
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(168,85,247,0.4);
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 2rem;
+            color: #94a3b8;
+        }
+
+        .login-link a {
+            color: #a855f7;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .error-msg {
+            color: #f87171;
+            font-size: 0.8rem;
+            margin-top: 0.3rem;
+            display: none;
+        }
+
+        .success-msg {
+            color: #4ade80;
+            font-size: 0.8rem;
+            margin-top: 0.3rem;
+            display: none;
+        }
+
+        .step {
+            display: none;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .step-dot {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #64748b;
+        }
+
+        .step-dot.active {
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            color: white;
+        }
+
+        .step-dot.completed {
+            background: #4ade80;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<div class="register-container">
+    <div class="logo">🕊️ Shorto</div>
+    
+    <div class="step-indicator">
+        <div class="step-dot" id="step1Dot">1</div>
+        <div class="step-dot" id="step2Dot">2</div>
+        <div class="step-dot" id="step3Dot">3</div>
+    </div>
+
+    <!-- Step 1: Email -->
+    <div class="step active" id="step1">
+        <h2 style="text-align: center; margin-bottom: 1.5rem;">Enter Your Email</h2>
+        <div class="form-group">
+            <label><i class="fas fa-envelope"></i> Email Address</label>
+            <input type="email" id="email" placeholder="you@example.com">
+            <div class="error-msg" id="emailError"></div>
+        </div>
+        <button class="btn-register" onclick="sendOTP()">
+            <i class="fas fa-paper-plane"></i> Send OTP
+        </button>
+    </div>
+
+    <!-- Step 2: OTP -->
+    <div class="step" id="step2">
+        <h2 style="text-align: center; margin-bottom: 1.5rem;">Verify OTP</h2>
+        <div class="form-group">
+            <label><i class="fas fa-key"></i> Enter OTP Code</label>
+            <div class="otp-group">
+                <input type="text" id="otp" placeholder="6-digit code" maxlength="6">
+                <button onclick="resendOTP()">Resend</button>
+            </div>
+            <div class="error-msg" id="otpError"></div>
+            <div class="success-msg" id="otpSuccess"></div>
+        </div>
+        <button class="btn-register" onclick="verifyOTP()">
+            <i class="fas fa-check-circle"></i> Verify OTP
+        </button>
+    </div>
+
+    <!-- Step 3: Password & Details -->
+    <div class="step" id="step3">
+        <h2 style="text-align: center; margin-bottom: 1.5rem;">Complete Profile</h2>
+        <div class="form-group">
+            <label><i class="fas fa-user"></i> Full Name</label>
+            <input type="text" id="fullname" placeholder="Your name">
+        </div>
+        <div class="form-group">
+            <label><i class="fas fa-lock"></i> Password</label>
+            <input type="password" id="password" placeholder="Create password">
+        </div>
+        <div class="form-group">
+            <label><i class="fas fa-lock"></i> Confirm Password</label>
+            <input type="password" id="confirmPassword" placeholder="Confirm password">
+        </div>
+        <div class="error-msg" id="registerError"></div>
+        <button class="btn-register" onclick="completeRegistration()">
+            <i class="fas fa-rocket"></i> Complete Registration
+        </button>
+    </div>
+
+    <div class="login-link">
+        Already have an account? <a href="login.html">Login</a>
+    </div>
+</div>
+
+<script>
+    let verifiedEmail = '';
+
+    function sendOTP() {
+        const email = document.getElementById('email').value;
+        if (!email) {
+            showError('emailError', 'Please enter email');
+            return;
+        }
+        
+        // API call to send OTP
+        fetch('/api/auth/send-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('step1').classList.remove('active');
+                document.getElementById('step2').classList.add('active');
+                document.getElementById('step1Dot').classList.add('completed');
+                document.getElementById('step2Dot').classList.add('active');
+                showSuccess('otpSuccess', 'OTP sent to your email!');
+            } else {
+                showError('emailError', data.message);
+            }
+        })
+        .catch(err => showError('emailError', 'Something went wrong'));
+    }
+
+    function verifyOTP() {
+        const otp = document.getElementById('otp').value;
+        const email = document.getElementById('email').value;
+        
+        fetch('/api/auth/verify-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, otp })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                verifiedEmail = email;
+                document.getElementById('step2').classList.remove('active');
+                document.getElementById('step3').classList.add('active');
+                document.getElementById('step2Dot').classList.add('completed');
+                document.getElementById('step3Dot').classList.add('active');
+            } else {
+                showError('otpError', 'Invalid OTP');
+            }
+        });
+    }
+
+    function completeRegistration() {
+        const fullname = document.getElementById('fullname').value;
+        const password = document.getElementById('password').value;
+        const confirm = document.getElementById('confirmPassword').value;
+        
+        if (password !== confirm) {
+            showError('registerError', 'Passwords do not match');
+            return;
+        }
+        
+        fetch('/api/auth/complete-registration', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: verifiedEmail, fullname, password })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = 'login.html';
+            } else {
+                showError('registerError', data.message);
+            }
+        });
+    }
+
+    function showError(elementId, message) {
+        const el = document.getElementById(elementId);
+        el.textContent = message;
+        el.style.display = 'block';
+        setTimeout(() => el.style.display = 'none', 3000);
+    }
+
+    function showSuccess(elementId, message) {
+        const el = document.getElementById(elementId);
+        el.textContent = message;
+        el.style.display = 'block';
+        setTimeout(() => el.style.display = 'none', 3000);
+    }
+
+    function resendOTP() {
+        sendOTP();
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,404 @@
+<!-- ==================== INDEX.HTML (Landing Page) ==================== -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="js/api.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shorto | Flying Messages</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #1a1a3e 50%, #24243e 100%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* Flying Letters Animation */
+        .floating-letter {
+            position: fixed;
+            font-size: 2rem;
+            pointer-events: none;
+            z-index: 1;
+            animation: floatAround 15s infinite linear;
+        }
+
+        @keyframes floatAround {
+            0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translate(200px, -200px) rotate(360deg); opacity: 0; }
+        }
+
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1.5rem 5%;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn-nav {
+            padding: 0.6rem 1.5rem;
+            border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: transparent;
+            color: white;
+            cursor: pointer;
+            transition: 0.3s;
+            text-decoration: none;
+        }
+
+        .btn-nav:hover {
+            background: rgba(168, 85, 247, 0.3);
+            border-color: #a855f7;
+        }
+
+        .btn-nav-primary {
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            border: none;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8rem 8% 4rem;
+            position: relative;
+            z-index: 2;
+            flex-wrap: wrap;
+        }
+
+        .hero-content {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .hero-badge {
+            background: rgba(168, 85, 247, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            display: inline-block;
+            font-size: 0.8rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(168, 85, 247, 0.4);
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero h1 span {
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            color: #a0aec0;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #a855f7;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+
+        .hero-image {
+            flex: 1;
+            min-width: 300px;
+            text-align: center;
+        }
+
+        .hero-image img {
+            max-width: 100%;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* Features Section */
+        .features {
+            padding: 4rem 8%;
+            background: rgba(0,0,0,0.3);
+            z-index: 2;
+            position: relative;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: rgba(30, 41, 59, 0.5);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 28px;
+            text-align: center;
+            transition: 0.3s;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(168, 85, 247, 0.3);
+        }
+
+        .feature-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 2rem;
+        }
+
+        .feature-card h3 {
+            margin-bottom: 1rem;
+        }
+
+        /* CTA Section */
+        .cta {
+            text-align: center;
+            padding: 4rem 8%;
+            z-index: 2;
+            position: relative;
+        }
+
+        .btn-large {
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-large:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(168, 85, 247, 0.4);
+        }
+
+        /* Footer */
+        .footer {
+            padding: 2rem 8%;
+            text-align: center;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: #64748b;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2rem; }
+            .navbar { padding: 1rem 5%; }
+            .nav-buttons { gap: 0.5rem; }
+            .btn-nav { padding: 0.4rem 1rem; font-size: 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+<div id="floatingLetters"></div>
+
+<nav class="navbar">
+    <div class="logo">🕊️ Shorto</div>
+    <div class="nav-buttons">
+        <a href="login.html" class="btn-nav">Login</a>
+        <a href="register.html" class="btn-nav btn-nav-primary">Get Started</a>
+    </div>
+</nav>
+
+<section class="hero">
+    <div class="hero-content">
+        <div class="hero-badge">
+            <i class="fas fa-feather-alt"></i> Flying Messages
+        </div>
+        <h1>Send a Message<br>Let It <span>Fly Randomly</span></h1>
+        <p>Write a message, release it into the digital sky, and watch it travel to random strangers around the world. Catch messages, connect with new people, and make magical conversations!</p>
+        <a href="register.html" class="btn-large">
+            <i class="fas fa-paper-plane"></i> Start Your Journey
+        </a>
+        <div class="hero-stats">
+            <div class="stat">
+                <div class="stat-number">10K+</div>
+                <div class="stat-label">Messages Sent</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">5K+</div>
+                <div class="stat-label">Connections</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">24h</div>
+                <div class="stat-label">Message Life</div>
+            </div>
+        </div>
+    </div>
+    <div class="hero-image">
+        <img src="https://cdn-icons-png.flaticon.com/512/3240/3240903.png" alt="Flying Messages">
+    </div>
+</section>
+
+<section class="features">
+    <h2 class="section-title">How It Works ✨</h2>
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-feather-alt"></i></div>
+            <h3>1. Write & Release</h3>
+            <p>Write your message and release it into the digital sky. No recipient needed!</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-globe"></i></div>
+            <h3>2. Flies Randomly</h3>
+            <p>Your message flies randomly to users around the world for 24 hours.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-hand-peace"></i></div>
+            <h3>3. Catch or Pass</h3>
+            <p>Someone catches your message. They can reply or pass it forward!</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-comments"></i></div>
+            <h3>4. Connect & Chat</h3>
+            <p>Send connection requests and start meaningful conversations.</p>
+        </div>
+    </div>
+</section>
+
+<section class="cta">
+    <h2 style="margin-bottom: 1rem;">Ready to Send a Flying Message?</h2>
+    <p style="margin-bottom: 2rem; color: #94a3b8;">Join thousands of users sharing magical moments</p>
+    <a href="register.html" class="btn-large">
+        <i class="fas fa-user-plus"></i> Create Free Account
+    </a>
+</section>
+
+<footer class="footer">
+    <p>© 2024 Shorto - Flying Messages. Spread magic, one message at a time. 🕊️</p>
+</footer>
+
+<script>
+    // Create stars
+    for (let i = 0; i < 200; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.width = Math.random() * 3 + 1 + 'px';
+        star.style.height = star.style.width;
+        star.style.animationDelay = Math.random() * 5 + 's';
+        star.style.animationDuration = Math.random() * 3 + 2 + 's';
+        document.getElementById('stars').appendChild(star);
+    }
+
+    // Create floating letters
+    const letters = ['🕊️', '📨', '✉️', '💌', '📝', '✨'];
+    for (let i = 0; i < 15; i++) {
+        const letter = document.createElement('div');
+        letter.className = 'floating-letter';
+        letter.textContent = letters[Math.floor(Math.random() * letters.length)];
+        letter.style.left = Math.random() * 100 + '%';
+        letter.style.top = Math.random() * 100 + '%';
+        letter.style.animationDelay = Math.random() * 10 + 's';
+        letter.style.animationDuration = Math.random() * 10 + 10 + 's';
+        document.getElementById('floatingLetters').appendChild(letter);
+    }
+</script>
+
+</body>
+</html>

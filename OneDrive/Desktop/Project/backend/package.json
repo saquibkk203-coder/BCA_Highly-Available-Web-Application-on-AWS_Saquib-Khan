@@ -1,0 +1,27 @@
+{
+  "name": "shorto-backend",
+  "version": "1.0.0",
+  "description": "Shorto Flying Messages Backend API",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.1693.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.6",
+    "crypto": "^1.0.1",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.1",
+    "express-rate-limit": "^6.10.0",
+    "helmet": "^7.2.0",
+    "jsonwebtoken": "^9.0.3",
+    "mysql2": "^3.21.1",
+    "nodemailer": "^6.10.1",
+    "socket.io": "^4.8.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

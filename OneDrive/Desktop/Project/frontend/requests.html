@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="js/api.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Shorto | Connection Requests</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #1a1a3e 50%, #24243e 100%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+        }
+        .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+        .star { position: absolute; background: white; border-radius: 50%; animation: twinkle 3s infinite; }
+        @keyframes twinkle { 0%,100% { opacity: 0.2; } 50% { opacity: 1; } }
+
+        .menu-toggle { position: fixed; top: 15px; left: 15px; z-index: 1001; background: rgba(168,85,247,0.9); border: none; color: white; width: 45px; height: 45px; border-radius: 12px; font-size: 1.3rem; cursor: pointer; display: none; }
+        .sidebar { position: fixed; left: 0; top: 0; width: 260px; height: 100%; background: rgba(15,23,42,0.98); backdrop-filter: blur(20px); border-right: 1px solid rgba(255,255,255,0.1); padding: 2rem 1rem; z-index: 1000; transition: transform 0.3s; overflow-y: auto; }
+        .sidebar.closed { transform: translateX(-100%); }
+        .logo { font-size: 1.5rem; font-weight: 800; background: linear-gradient(135deg,#a855f7,#ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; text-align: center; margin-bottom: 2rem; }
+        .menu-item { display: flex; align-items: center; gap: 12px; padding: 12px 15px; margin: 5px 0; border-radius: 12px; color: #94a3b8; cursor: pointer; transition: 0.3s; }
+        .menu-item:hover, .menu-item.active { background: rgba(168,85,247,0.2); color: white; }
+        .menu-item i { width: 24px; }
+
+        .main-content { margin-left: 260px; padding: 2rem; position: relative; z-index: 1; min-height: 100vh; }
+        .header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;
+            background: rgba(15,23,42,0.5); backdrop-filter: blur(10px);
+            padding: 1rem 1.5rem; border-radius: 24px;
+        }
+        .user-info { display: flex; align-items: center; gap: 10px; background: rgba(30,41,59,0.6); padding: 0.5rem 1rem; border-radius: 40px; cursor: pointer; }
+        .avatar { width: 35px; height: 35px; background: linear-gradient(135deg,#a855f7,#ec4899); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 0.5rem;
+        }
+        .tab {
+            padding: 0.8rem 1.5rem;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: 600;
+        }
+        .tab.active {
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            color: white;
+        }
+        .tab:not(.active):hover {
+            background: rgba(168,85,247,0.2);
+        }
+
+        .requests-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .request-card {
+            background: rgba(30,41,59,0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 1.2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            transition: 0.3s;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .request-card:hover {
+            transform: translateX(5px);
+            border-color: rgba(168,85,247,0.3);
+        }
+        .request-info {
+            flex: 1;
+        }
+        .request-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 0.5rem;
+        }
+        .request-avatar {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        .request-name {
+            font-weight: 700;
+            font-size: 1rem;
+        }
+        .request-message {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-left: 55px;
+        }
+        .request-time {
+            font-size: 0.7rem;
+            color: #64748b;
+        }
+        .request-actions {
+            display: flex;
+            gap: 0.8rem;
+        }
+        .btn-accept, .btn-decline, .btn-cancel {
+            padding: 0.5rem 1.2rem;
+            border-radius: 30px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn-accept {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+        .btn-decline {
+            background: rgba(239,68,68,0.2);
+            border: 1px solid rgba(239,68,68,0.3);
+            color: #f87171;
+        }
+        .btn-cancel {
+            background: rgba(239,68,68,0.2);
+            border: 1px solid rgba(239,68,68,0.3);
+            color: #f87171;
+        }
+        .status-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        .status-pending { background: rgba(245,158,11,0.2); color: #fbbf24; }
+        .status-accepted { background: rgba(16,185,129,0.2); color: #10b981; }
+        .status-declined { background: rgba(239,68,68,0.2); color: #f87171; }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #64748b;
+        }
+
+        @media (max-width: 768px) {
+            .menu-toggle { display: block; }
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 1rem; padding-top: 70px; }
+            .request-card { flex-direction: column; align-items: stretch; }
+            .request-actions { justify-content: flex-end; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+<button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+
+<div class="sidebar" id="sidebar">
+    <div class="logo">🕊️ Shorto</div>
+    <div onclick="navigate('dashboard.html')" class="menu-item"><i class="fas fa-home"></i> Dashboard</div>
+    <div onclick="navigate('send.html')" class="menu-item"><i class="fas fa-paper-plane"></i> Send Message</div>
+    <div onclick="navigate('sky.html')" class="menu-item"><i class="fas fa-globe"></i> Flying Sky</div>
+    <div onclick="navigate('requests.html')" class="menu-item active"><i class="fas fa-handshake"></i> Requests</div>
+    <div onclick="navigate('messages.html')" class="menu-item"><i class="fas fa-comments"></i> Messages</div>
+    <div onclick="navigate('profile.html')" class="menu-item"><i class="fas fa-user"></i> Profile</div>
+    <div onclick="logout()" class="menu-item" style="margin-top: 2rem; color: #f87171;"><i class="fas fa-sign-out-alt"></i> Logout</div>
+</div>
+
+<div class="main-content">
+    <div class="header">
+        <h2><i class="fas fa-handshake" style="color: #a855f7;"></i> Connection Requests</h2>
+        <div class="user-info" onclick="navigate('profile.html')">
+            <div class="avatar"><i class="fas fa-user"></i></div>
+            <span id="userName">User</span>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" onclick="showTab('incoming')">📥 Incoming</div>
+        <div class="tab" onclick="showTab('outgoing')">📤 Outgoing</div>
+    </div>
+
+    <div id="incomingTab" class="requests-grid"></div>
+    <div id="outgoingTab" class="requests-grid" style="display: none;"></div>
+</div>
+
+<script>
+    for (let i = 0; i < 100; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.width = Math.random() * 3 + 1 + 'px';
+        star.style.height = star.style.width;
+        star.style.animationDelay = Math.random() * 5 + 's';
+        document.getElementById('stars').appendChild(star);
+    }
+
+    const sidebar = document.getElementById('sidebar');
+    document.getElementById('menuToggle').onclick = () => sidebar.classList.toggle('open');
+    function navigate(page) { window.location.href = page; }
+    function logout() { localStorage.removeItem('currentUser'); window.location.href = 'index.html'; }
+
+    let user = null;
+    try {
+        const u = localStorage.getItem('currentUser');
+        if (u && u !== 'undefined') user = JSON.parse(u);
+    } catch(e) {}
+    if (!user) user = { email: 'demo@shorto.com', fullname: 'Demo User' };
+    document.getElementById('userName').innerText = user.fullname || user.email.split('@')[0];
+
+    // ========== REPLACED FUNCTIONS ==========
+    async function loadRequests() {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            navigate('login.html');
+            return;
+        }
+
+        try {
+            // Incoming requests from backend
+            const response = await fetch('/api/requests/incoming', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const data = await response.json();
+
+            const incomingDiv = document.getElementById('incomingTab');
+            
+            if (!data.requests || data.requests.length === 0) {
+                incomingDiv.innerHTML = `<div class="empty-state"><i class="fas fa-handshake" style="font-size: 3rem; margin-bottom: 1rem;"></i><br>No incoming requests yet.<br>When someone wants to talk, you'll see it here!</div>`;
+            } else {
+                incomingDiv.innerHTML = data.requests.map(req => `
+                    <div class="request-card">
+                        <div class="request-info">
+                            <div class="request-user">
+                                <div class="request-avatar"><i class="fas fa-user"></i></div>
+                                <div>
+                                    <div class="request-name">${req.from_name || req.from_email.split('@')[0]}</div>
+                                    <div class="request-time">${new Date(req.created_at).toLocaleString()}</div>
+                                </div>
+                            </div>
+                            <div class="request-message">
+                                <i class="fas fa-comment"></i> ${req.message_text || 'Wants to connect with you'}
+                            </div>
+                        </div>
+                        <div class="request-actions">
+                            <button class="btn-accept" onclick="acceptRequest('${req.request_id}')"><i class="fas fa-check"></i> Accept</button>
+                            <button class="btn-decline" onclick="declineRequest('${req.request_id}')"><i class="fas fa-times"></i> Decline</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            // Load outgoing requests
+            loadOutgoingRequests();
+            
+        } catch(e) {
+            console.error('Error:', e);
+            document.getElementById('incomingTab').innerHTML = `<div class="empty-state">Error loading requests</div>`;
+        }
+    }
+
+    async function loadOutgoingRequests() {
+        const token = localStorage.getItem('token');
+        try {
+            const response = await fetch('/api/requests/outgoing', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const data = await response.json();
+            
+            const outgoingDiv = document.getElementById('outgoingTab');
+            
+            if (!data.requests || data.requests.length === 0) {
+                outgoingDiv.innerHTML = `<div class="empty-state"><i class="fas fa-paper-plane" style="font-size: 3rem; margin-bottom: 1rem;"></i><br>No outgoing requests.</div>`;
+            } else {
+                outgoingDiv.innerHTML = data.requests.map(req => `
+                    <div class="request-card">
+                        <div class="request-info">
+                            <div class="request-user">
+                                <div class="request-avatar"><i class="fas fa-user"></i></div>
+                                <div>
+                                    <div class="request-name">To: ${req.to_name || req.to_email.split('@')[0]}</div>
+                                    <div class="request-time">${new Date(req.created_at).toLocaleString()}</div>
+                                </div>
+                            </div>
+                            <div class="request-message">
+                                <i class="fas fa-comment"></i> ${req.message_text || 'Connection request'}
+                            </div>
+                            <div class="status-badge status-${req.status}">${req.status.toUpperCase()}</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        } catch(e) {
+            console.error('Error:', e);
+        }
+    }
+
+    async function acceptRequest(requestId) {
+        const token = localStorage.getItem('token');
+        try {
+            const response = await fetch(`/api/requests/accept/${requestId}`, {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const data = await response.json();
+            alert(data.message);
+            loadRequests();
+        } catch(e) {
+            alert('Error accepting request');
+        }
+    }
+
+    async function declineRequest(requestId) {
+        const token = localStorage.getItem('token');
+        try {
+            const response = await fetch(`/api/requests/decline/${requestId}`, {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const data = await response.json();
+            alert(data.message);
+            loadRequests();
+        } catch(e) {
+            alert('Error declining request');
+        }
+    }
+
+    function cancelRequest(requestId) {
+        let requests = JSON.parse(localStorage.getItem('requests') || '[]');
+        requests = requests.filter(r => r.id != requestId);
+        localStorage.setItem('requests', JSON.stringify(requests));
+        alert('Request cancelled.');
+        loadRequests();
+    }
+
+    function showTab(tab) {
+        const incoming = document.getElementById('incomingTab');
+        const outgoing = document.getElementById('outgoingTab');
+        const tabs = document.querySelectorAll('.tab');
+
+        if (tab === 'incoming') {
+            incoming.style.display = 'flex';
+            outgoing.style.display = 'none';
+            tabs[0].classList.add('active');
+            tabs[1].classList.remove('active');
+        } else {
+            incoming.style.display = 'none';
+            outgoing.style.display = 'flex';
+            tabs[0].classList.remove('active');
+            tabs[1].classList.add('active');
+        }
+    }
+
+    loadRequests();
+</script>
+</body>
+</html>
+

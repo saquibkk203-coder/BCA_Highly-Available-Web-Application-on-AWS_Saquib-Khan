@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="js/api.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shorto | Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #1a1a3e 50%, #24243e 100%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255,255,255,0.1);
+            padding: 2rem 1.5rem;
+            z-index: 100;
+            transition: all 0.3s;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 2.5rem;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .logo i {
+            font-size: 2rem;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.9rem 1rem;
+            margin: 0.5rem 0;
+            border-radius: 16px;
+            color: #94a3b8;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .menu-item i {
+            width: 24px;
+            font-size: 1.2rem;
+        }
+
+        .menu-item:hover {
+            background: rgba(168, 85, 247, 0.15);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .menu-item.active {
+            background: linear-gradient(95deg, rgba(168, 85, 247, 0.2), rgba(236, 72, 153, 0.1));
+            color: white;
+            border-left: 3px solid #a855f7;
+        }
+
+        .main-content {
+            margin-left: 280px;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(10px);
+            padding: 1rem 1.5rem;
+            border-radius: 24px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .welcome h1 {
+            font-size: 1.6rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .welcome p {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: rgba(30, 41, 59, 0.6);
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .user-info:hover {
+            background: rgba(168, 85, 247, 0.2);
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(30, 41, 59, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(168, 85, 247, 0.4);
+            background: rgba(30, 41, 59, 0.7);
+            box-shadow: 0 20px 40px -12px rgba(0,0,0,0.3);
+        }
+
+        .stat-icon {
+            width: 55px;
+            height: 55px;
+            background: linear-gradient(135deg, rgba(168,85,247,0.2), rgba(236,72,153,0.1));
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin: 0.5rem 0;
+            background: linear-gradient(135deg, #fff, #a855f7);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .stat-label {
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 1rem;
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            border: none;
+            border-radius: 20px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 0.95rem;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px -8px rgba(168,85,247,0.5);
+        }
+
+        .action-btn-secondary {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .action-btn-secondary:hover {
+            background: rgba(168, 85, 247, 0.3);
+            border-color: #a855f7;
+        }
+
+        .recent-section {
+            background: rgba(30, 41, 59, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 1.5rem;
+        }
+
+        .recent-title {
+            margin-bottom: 1.2rem;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.8rem 1rem;
+            background: rgba(0,0,0,0.2);
+            border-radius: 16px;
+            transition: 0.3s;
+        }
+
+        .activity-item:hover {
+            background: rgba(168, 85, 247, 0.1);
+            transform: translateX(5px);
+        }
+
+        .activity-icon {
+            width: 35px;
+            height: 35px;
+            background: rgba(168, 85, 247, 0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .activity-text {
+            flex: 1;
+        }
+
+        .activity-text strong {
+            display: block;
+            font-size: 0.9rem;
+        }
+
+        .activity-text small {
+            font-size: 0.7rem;
+            color: #64748b;
+        }
+
+        .activity-time {
+            font-size: 0.7rem;
+            color: #64748b;
+        }
+
+        .logout-btn {
+            position: absolute;
+            bottom: 2rem;
+            left: 1.5rem;
+            right: 1.5rem;
+            padding: 0.8rem;
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 16px;
+            color: #f87171;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.4);
+            border-color: #ef4444;
+            color: white;
+        }
+
+        .demo-notice {
+            background: rgba(168, 85, 247, 0.15);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 16px;
+            padding: 0.8rem 1rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { width: 80px; padding: 1rem; }
+            .sidebar span { display: none; }
+            .logo span { display: none; }
+            .menu-item { justify-content: center; }
+            .main-content { margin-left: 80px; }
+            .logout-btn span { display: none; }
+            .logout-btn { justify-content: center; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .quick-actions { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+
+<div class="sidebar">
+    <div class="logo">
+        <i class="fas fa-feather-alt"></i>
+        <span>Shorto</span>
+    </div>
+
+    <div onclick="navigateTo('dashboard.html')" class="menu-item active">
+        <i class="fas fa-home"></i> <span>Dashboard</span>
+    </div>
+    <div onclick="navigateTo('send.html')" class="menu-item">
+        <i class="fas fa-paper-plane"></i> <span>Send Message</span>
+    </div>
+    <div onclick="navigateTo('sky.html')" class="menu-item">
+        <i class="fas fa-globe"></i> <span>Flying Sky</span>
+    </div>
+    <div onclick="navigateTo('requests.html')" class="menu-item">
+        <i class="fas fa-handshake"></i> <span>Requests</span>
+    </div>
+    <div onclick="navigateTo('messages.html')" class="menu-item">
+        <i class="fas fa-comments"></i> <span>Messages</span>
+    </div>
+    <div onclick="navigateTo('profile.html')" class="menu-item">
+        <i class="fas fa-user"></i> <span>Profile</span>
+    </div>
+
+    <div class="logout-btn" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Logout</span>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="header">
+        <div class="welcome">
+            <h1>Welcome back, <span id="userName">User</span>! 👋</h1>
+            <p><i class="fas fa-calendar-alt"></i> <span id="currentDate"></span></p>
+        </div>
+        <div class="user-info" onclick="navigateTo('profile.html')">
+            <div class="avatar"><i class="fas fa-user"></i></div>
+            <div>
+                <div style="font-weight: 600;" id="userEmail">user@example.com</div>
+                <div style="font-size: 0.7rem; color: #94a3b8;">View Profile</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="demo-notice" id="demoNotice" style="display: none;">
+        <i class="fas fa-info-circle" style="color: #a855f7; font-size: 1.2rem;"></i>
+        <div>You are using Demo Mode. <strong id="demoEmail"></strong> To see real data, please register and login.</div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card" onclick="navigateTo('send.html')">
+            <div class="stat-icon"><i class="fas fa-paper-plane"></i></div>
+            <div class="stat-value" id="sentCount">0</div>
+            <div class="stat-label">Messages Sent</div>
+        </div>
+        <div class="stat-card" onclick="navigateTo('sky.html')">
+            <div class="stat-icon"><i class="fas fa-globe"></i></div>
+            <div class="stat-value" id="flyingCount">0</div>
+            <div class="stat-label">Messages Flying</div>
+        </div>
+        <div class="stat-card" onclick="navigateTo('sky.html')">
+            <div class="stat-icon"><i class="fas fa-hand-peace"></i></div>
+            <div class="stat-value" id="caughtCount">0</div>
+            <div class="stat-label">Messages Caught</div>
+        </div>
+        <div class="stat-card" onclick="navigateTo('requests.html')">
+            <div class="stat-icon"><i class="fas fa-users"></i></div>
+            <div class="stat-value" id="requestCount">0</div>
+            <div class="stat-label">Pending Requests</div>
+        </div>
+    </div>
+
+    <div class="quick-actions">
+        <div onclick="navigateTo('send.html')" class="action-btn"><i class="fas fa-feather-alt"></i> ✍️ Send New Message</div>
+        <div onclick="navigateTo('sky.html')" class="action-btn action-btn-secondary"><i class="fas fa-globe"></i> 🎯 Catch Flying Messages</div>
+        <div onclick="navigateTo('requests.html')" class="action-btn action-btn-secondary"><i class="fas fa-handshake"></i> 🤝 View Requests</div>
+    </div>
+
+    <div class="recent-section">
+        <h3 class="recent-title"><i class="fas fa-clock" style="color: #a855f7;"></i> Recent Activity</h3>
+        <div class="activity-list" id="activityList">
+            <div class="activity-item">
+                <div class="activity-icon"><i class="fas fa-feather-alt" style="color: #a855f7;"></i></div>
+                <div class="activity-text">
+                    <strong>Welcome to Shorto!</strong>
+                    <small>Start by sending your first flying message</small>
+                </div>
+                <div class="activity-time">Just now</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    for (let i = 0; i < 150; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.width = Math.random() * 3 + 1 + 'px';
+        star.style.height = star.style.width;
+        star.style.animationDelay = Math.random() * 5 + 's';
+        star.style.animationDuration = Math.random() * 3 + 2 + 's';
+        document.getElementById('stars').appendChild(star);
+    }
+
+    const today = new Date();
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    document.getElementById('currentDate').textContent = today.toLocaleDateString('en-US', options);
+
+    function navigateTo(page) { window.location.href = page; }
+    function logout() { localStorage.removeItem('currentUser'); localStorage.removeItem('token'); window.location.href = 'index.html'; }
+
+    let currentUser = null;
+    let isDemoMode = false;
+
+    try {
+        const userData = localStorage.getItem('currentUser');
+        if (userData && userData !== 'undefined' && userData !== 'null') {
+            currentUser = JSON.parse(userData);
+        }
+    } catch(e) {}
+
+    async function loadStats() {
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+            isDemoMode = true;
+            currentUser = { email: 'demo@shorto.com', fullname: 'Demo User', isDemo: true };
+            document.getElementById('demoNotice').style.display = 'flex';
+            document.getElementById('demoEmail').textContent = 'demo@shorto.com';
+            document.getElementById('sentCount').textContent = '0';
+            document.getElementById('flyingCount').textContent = '0';
+            document.getElementById('caughtCount').textContent = '0';
+            document.getElementById('requestCount').textContent = '0';
+            return;
+        }
+        
+        try {
+            const response = await fetch('/api/auth/stats', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const data = await response.json();
+            
+            if (data.success) {
+                document.getElementById('sentCount').textContent = data.stats.sent || 0;
+                document.getElementById('flyingCount').textContent = data.stats.flying || 0;
+                document.getElementById('caughtCount').textContent = data.stats.caught || 0;
+                document.getElementById('requestCount').textContent = data.stats.requests || 0;
+            }
+            
+            loadRecentActivity(data.stats.sent || 0, data.stats.caught || 0, data.stats.requests || 0);
+        } catch(e) {
+            console.error('Error loading stats:', e);
+        }
+    }
+
+    function loadRecentActivity(sent, caught, requests) {
+        const activityList = document.getElementById('activityList');
+        activityList.innerHTML = '';
+        
+        const activities = [];
+        if (sent > 0) activities.push({ icon: 'fa-paper-plane', color: '#a855f7', text: `You sent ${sent} flying message${sent > 1 ? 's' : ''}`, time: 'Recently' });
+        if (caught > 0) activities.push({ icon: 'fa-hand-peace', color: '#10b981', text: `You caught ${caught} message${caught > 1 ? 's' : ''}`, time: 'Recently' });
+        if (requests > 0) activities.push({ icon: 'fa-handshake', color: '#fbbf24', text: `${requests} pending connection request${requests > 1 ? 's' : ''}`, time: 'Waiting' });
+        if (activities.length === 0) activities.push({ icon: 'fa-feather-alt', color: '#64748b', text: 'No activity yet. Send your first flying message!', time: 'Start now' });
+        
+        activities.forEach(activity => {
+            const item = document.createElement('div');
+            item.className = 'activity-item';
+            item.innerHTML = `<div class="activity-icon" style="background: ${activity.color}20;"><i class="fas ${activity.icon}" style="color: ${activity.color};"></i></div><div class="activity-text"><strong>${activity.text}</strong></div><div class="activity-time">${activity.time}</div>`;
+            activityList.appendChild(item);
+        });
+    }
+    
+    if (currentUser && currentUser.email) {
+        document.getElementById('userName').innerText = currentUser.fullname || currentUser.email.split('@')[0];
+        document.getElementById('userEmail').innerText = currentUser.email;
+    }
+    
+    loadStats();
+</script>
+
+</body>
+</html>

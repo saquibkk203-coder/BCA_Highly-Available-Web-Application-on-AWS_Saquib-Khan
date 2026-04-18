@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="js/api.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Shorto | My Profile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #1a1a3e 50%, #24243e 100%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        .menu-toggle {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1001;
+            background: rgba(168, 85, 247, 0.9);
+            border: none;
+            color: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            font-size: 1.3rem;
+            cursor: pointer;
+            display: none;
+            backdrop-filter: blur(10px);
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 260px;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.98);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2rem 1rem;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+        .sidebar.closed {
+            transform: translateX(-100%);
+        }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            margin: 5px 0;
+            border-radius: 12px;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .menu-item:hover, .menu-item.active {
+            background: rgba(168, 85, 247, 0.2);
+            color: white;
+        }
+        .menu-item i {
+            width: 24px;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(10px);
+            padding: 1rem 1.5rem;
+            border-radius: 24px;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(30, 41, 59, 0.6);
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            cursor: pointer;
+        }
+        .avatar-small {
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .profile-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .profile-card {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(20px);
+            border-radius: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .cover-photo {
+            height: 120px;
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            position: relative;
+        }
+
+        .avatar-section {
+            text-align: center;
+            margin-top: -50px;
+            position: relative;
+            z-index: 2;
+        }
+        .avatar-large {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            margin: 0 auto;
+            border: 4px solid rgba(30, 41, 59, 0.9);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .change-avatar-btn {
+            background: rgba(168, 85, 247, 0.2);
+            border: 1px solid rgba(168, 85, 247, 0.4);
+            padding: 6px 12px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            margin-top: 8px;
+            cursor: pointer;
+            display: inline-block;
+            transition: 0.3s;
+        }
+        .change-avatar-btn:hover {
+            background: rgba(168, 85, 247, 0.4);
+        }
+
+        .profile-info {
+            text-align: center;
+            padding: 1rem 1.5rem;
+        }
+        .profile-name {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+        }
+        .profile-email {
+            color: #94a3b8;
+            margin-bottom: 0.5rem;
+        }
+        .profile-badge {
+            background: rgba(168, 85, 247, 0.2);
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            display: inline-block;
+        }
+
+        .stats-row {
+            display: flex;
+            justify-content: space-around;
+            padding: 1rem 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #a855f7;
+        }
+        .stat-label {
+            font-size: 0.7rem;
+            color: #94a3b8;
+        }
+
+        .edit-section {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .section-title {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            color: white;
+            font-family: inherit;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #a855f7;
+        }
+        .btn-save {
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(168, 85, 247, 0.3);
+        }
+
+        .danger-zone {
+            padding: 1.5rem;
+            background: rgba(239, 68, 68, 0.1);
+            border-top: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        .danger-title {
+            color: #f87171;
+            margin-bottom: 0.5rem;
+        }
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            padding: 10px 20px;
+            border-radius: 30px;
+            color: #f87171;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.4);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 20px;
+            left: 20px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            padding: 1rem;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transform: translateX(200%);
+            transition: 0.4s;
+            z-index: 10000;
+            max-width: 350px;
+            margin: 0 auto;
+        }
+        .toast.show {
+            transform: translateX(0);
+        }
+        .toast.error {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        @media (max-width: 768px) {
+            .menu-toggle { display: block; }
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 1rem; padding-top: 70px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+<button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+
+<div class="sidebar" id="sidebar">
+    <div class="logo">🕊️ Shorto</div>
+    <div onclick="navigate('dashboard.html')" class="menu-item"><i class="fas fa-home"></i> Dashboard</div>
+    <div onclick="navigate('send.html')" class="menu-item"><i class="fas fa-paper-plane"></i> Send Message</div>
+    <div onclick="navigate('sky.html')" class="menu-item"><i class="fas fa-globe"></i> Flying Sky</div>
+    <div onclick="navigate('requests.html')" class="menu-item"><i class="fas fa-handshake"></i> Requests</div>
+    <div onclick="navigate('messages.html')" class="menu-item"><i class="fas fa-comments"></i> Messages</div>
+    <div onclick="navigate('profile.html')" class="menu-item active"><i class="fas fa-user"></i> Profile</div>
+    <div onclick="logout()" class="menu-item" style="margin-top: 2rem; color: #f87171;"><i class="fas fa-sign-out-alt"></i> Logout</div>
+</div>
+
+<div class="main-content">
+    <div class="header">
+        <h2><i class="fas fa-user-circle" style="color: #a855f7;"></i> My Profile</h2>
+        <div class="user-info" onclick="navigate('profile.html')">
+            <div class="avatar-small"><i class="fas fa-user"></i></div>
+            <span id="userName">User</span>
+        </div>
+    </div>
+
+    <div class="profile-container">
+        <div class="profile-card">
+            <div class="cover-photo"></div>
+
+            <div class="avatar-section">
+                <div class="avatar-large" id="avatarLarge">
+                    <i class="fas fa-user-astronaut"></i>
+                </div>
+                <div class="change-avatar-btn" onclick="changeAvatar()">
+                    <i class="fas fa-camera"></i> Change Avatar
+                </div>
+            </div>
+
+            <div class="profile-info">
+                <h2 class="profile-name" id="profileName">Loading...</h2>
+                <p class="profile-email" id="profileEmail">loading@example.com</p>
+                <span class="profile-badge"><i class="fas fa-calendar-alt"></i> Joined <span id="joinDate">-</span></span>
+            </div>
+
+            <div class="stats-row" id="statsRow">
+                <div class="stat-item">
+                    <div class="stat-number" id="statSent">0</div>
+                    <div class="stat-label">Messages Sent</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="statCaught">0</div>
+                    <div class="stat-label">Messages Caught</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="statRequests">0</div>
+                    <div class="stat-label">Connections</div>
+                </div>
+            </div>
+
+            <div class="edit-section">
+                <div class="section-title">
+                    <i class="fas fa-edit" style="color: #a855f7;"></i> Edit Profile
+                </div>
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="editFullname" placeholder="Enter your full name">
+                </div>
+                <button class="btn-save" onclick="updateProfile()">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+            </div>
+
+            <div class="edit-section">
+                <div class="section-title">
+                    <i class="fas fa-lock" style="color: #fbbf24;"></i> Change Password
+                </div>
+                <div class="form-group">
+                    <label>Current Password</label>
+                    <input type="password" id="currentPassword" placeholder="Enter current password">
+                </div>
+                <div class="form-group">
+                    <label>New Password</label>
+                    <input type="password" id="newPassword" placeholder="Enter new password (min 6 chars)">
+                </div>
+                <div class="form-group">
+                    <label>Confirm New Password</label>
+                    <input type="password" id="confirmPassword" placeholder="Confirm new password">
+                </div>
+                <button class="btn-save" onclick="changePassword()">
+                    <i class="fas fa-key"></i> Update Password
+                </button>
+            </div>
+
+            <div class="danger-zone">
+                <div class="section-title danger-title">
+                    <i class="fas fa-exclamation-triangle"></i> Danger Zone
+                </div>
+                <button class="btn-danger" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+                <button class="btn-danger" onclick="deleteAccount()" style="margin-left: 10px;">
+                    <i class="fas fa-trash-alt"></i> Delete Account
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"><i class="fas fa-check-circle"></i><span id="toastMsg"></span></div>
+
+<script>
+    for (let i = 0; i < 100; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.width = Math.random() * 3 + 1 + 'px';
+        star.style.height = star.style.width;
+        star.style.animationDelay = Math.random() * 5 + 's';
+        document.getElementById('stars').appendChild(star);
+    }
+
+    const sidebar = document.getElementById('sidebar');
+    document.getElementById('menuToggle').onclick = () => sidebar.classList.toggle('open');
+
+    function navigate(page) {
+        window.location.href = page;
+    }
+
+    function showToast(message, isError = false) {
+        const toast = document.getElementById('toast');
+        const toastMsg = document.getElementById('toastMsg');
+        toastMsg.textContent = message;
+        toast.classList.add('show');
+        if (isError) {
+            toast.classList.add('error');
+        } else {
+            toast.classList.remove('error');
+        }
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+    }
+
+    function logout() {
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('token');
+        window.location.href = 'index.html';
+    }
+
+    let currentUser = null;
+    let token = null;
+
+    try {
+        const userData = localStorage.getItem('currentUser');
+        if (userData && userData !== 'undefined' && userData !== 'null') {
+            currentUser = JSON.parse(userData);
+        }
+        token = localStorage.getItem('token');
+    } catch(e) {
+        console.log('No user data');
+    }
+
+    async function loadUserData() {
+        if (!token) {
+            document.getElementById('profileName').textContent = currentUser?.fullname || 'Demo User';
+            document.getElementById('profileEmail').textContent = currentUser?.email || 'demo@shorto.com';
+            document.getElementById('editFullname').value = currentUser?.fullname || 'Demo User';
+            document.getElementById('joinDate').textContent = 'January 2024';
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/auth/profile', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success) {
+                    const user = data.user;
+                    document.getElementById('profileName').textContent = user.fullname;
+                    document.getElementById('profileEmail').textContent = user.email;
+                    document.getElementById('editFullname').value = user.fullname;
+                    document.getElementById('joinDate').textContent = new Date(user.created_at).toLocaleDateString('en-US', {
+                        year: 'numeric', month: 'long', day: 'numeric'
+                    });
+                }
+            }
+        } catch (error) {
+            console.error('Error loading user data:', error);
+        }
+    }
+
+    async function loadUserStats() {
+        if (!token) {
+            document.getElementById('statSent').textContent = '0';
+            document.getElementById('statCaught').textContent = '0';
+            document.getElementById('statRequests').textContent = '0';
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/auth/stats', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success) {
+                    document.getElementById('statSent').textContent = data.stats.sent || 0;
+                    document.getElementById('statCaught').textContent = data.stats.caught || 0;
+                    document.getElementById('statRequests').textContent = data.stats.requests || 0;
+                }
+            }
+        } catch (error) {
+            console.error('Error loading stats:', error);
+        }
+    }
+
+    async function updateProfile() {
+        const fullname = document.getElementById('editFullname').value.trim();
+        if (!fullname) {
+            showToast('Please enter your full name', true);
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/auth/profile', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({ fullname })
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                showToast('Profile updated successfully!');
+                document.getElementById('profileName').textContent = fullname;
+                if (currentUser) {
+                    currentUser.fullname = fullname;
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                }
+            } else {
+                showToast(data.message || 'Update failed', true);
+            }
+        } catch (error) {
+            showToast('Network error', true);
+        }
+    }
+
+    async function changePassword() {
+        const currentPassword = document.getElementById('currentPassword').value;
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        if (!currentPassword || !newPassword || !confirmPassword) {
+            showToast('Please fill all password fields', true);
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            showToast('New passwords do not match', true);
+            return;
+        }
+
+        if (newPassword.length < 6) {
+            showToast('New password must be at least 6 characters', true);
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/auth/change-password', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({ currentPassword, newPassword })
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                showToast('Password changed successfully!');
+                document.getElementById('currentPassword').value = '';
+                document.getElementById('newPassword').value = '';
+                document.getElementById('confirmPassword').value = '';
+            } else {
+                showToast(data.message || 'Password change failed', true);
+            }
+        } catch (error) {
+            showToast('Network error', true);
+        }
+    }
+
+    function changeAvatar() {
+        const avatars = ['👨‍🚀', '👩‍🚀', '🕊️', '✨', '🌟', '🦋', '🌈', '🎈', '📨', '💌'];
+        const currentAvatar = document.querySelector('#avatarLarge i').textContent;
+        let currentIndex = avatars.indexOf(currentAvatar);
+        let nextIndex = (currentIndex + 1) % avatars.length;
+        document.querySelector('#avatarLarge i').textContent = avatars[nextIndex];
+        showToast('Avatar changed!');
+    }
+
+    function deleteAccount() {
+        if (confirm('⚠️ Are you sure you want to delete your account? This action cannot be undone!')) {
+            showToast('Account deletion feature coming soon.', true);
+        }
+    }
+
+    if (currentUser) {
+        document.getElementById('profileName').textContent = currentUser.fullname;
+        document.getElementById('profileEmail').textContent = currentUser.email;
+        document.getElementById('editFullname').value = currentUser.fullname;
+    }
+    loadUserData();
+    loadUserStats();
+
+    document.addEventListener('click', function(event) {
+        const sidebar = document.getElementById('sidebar');
+        const toggle = document.getElementById('menuToggle');
+        if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
+            if (!sidebar.contains(event.target) && !toggle.contains(event.target)) {
+                sidebar.classList.remove('open');
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
